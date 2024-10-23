@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .blinking {
+        animation: blinker 1s linear infinite;
+        color: red;
+    }
+
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+</style>
+
+<!-- Main Start -->
+<main>
+    <!-- Services -->
+    <section class="container my-4">
+        <h1 class="text-center mb-4 section-heading border-bottom pb-2">Checkout</h1>
+        <table class="table table-bordered">
+            <thead class="table-warning">
+                <tr>
+                    <th>Plan</th>
+                    <th>Plan Detail</th>
+                    <th>Payment For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <table class="table-bordered table">
+                            <tr>
+                                <th>Name</th>
+                                <td>{{plan.title}}</td>
+                            </tr>
+                            <tr>
+                                <th>Price</th>
+                                <td>${{plan.price}}</td>
+                            </tr>
+                            <tr>
+                                <th>Max Member</th>
+                                <td>{{plan.max_member}}</td>
+                            </tr>
+                            <tr>
+                                <th>Already Registered</th>
+                                <td>15</td>
+                            </tr>
+                            <tr>
+                                <th>Balance Seats</th>
+                                <td>15</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            {% for subprice in plan.subpricing_set.all %}
+                            <li>{{subprice.detail}}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td><input data-planprice="{{plan.price}}" data-discount="0" type="radio" id="validity1"
+                                        name="validity" class="select-validity" value="1" /></td>
+                                <th><label for="validity1">1 Month</label></th>
+                                <td>0%</td>
+                            </tr>
+                            <tr>
+                                <td><input data-planprice="{{plan.price}}" data-discount="10" type="radio"
+                                        id="validity2" name="validity" class="select-validity" value="3" /></td>
+                                <th><label for="validity2">3 Month</label></th>
+                                <td>10%</td>
+                            </tr>
+                            <tr>
+                                <td><input data-planprice="{{plan.price}}" data-discount="20" type="radio"
+                                        id="validity3" value="6" name="validity" class="select-validity" /></td>
+                                <th><label for="validity3">6 Month</label></th>
+                                <td>20%</td>
+                            </tr>
+                            <tr>
+                                <td><input data-planprice="{{plan.price}}" data-discount="30" type="radio"
+                                        id="validity4" value="12" name="validity" class="select-validity" /></td>
+                                <th><label for="validity4">12 Month</label></th>
+                                <td>30%</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="table-info payment-info" style="display:none;"> <!-- Hidden by default -->
+                <tr>
+                    <td></td>
+                    <th>Original Price</th>
+                    <td><b>$<span class="originalPrice">{{plan.price}}</span></b></td>
+                </tr>
+                <tr class="discount-row" style="display:none;"> <!-- Hidden by default -->
+                    <td></td>
+                    <th>After Discount</th>
+                    <td><b>$<span class="discountedPrice"></span></b></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td>
+                        <form action="{% url 'checkout_session' plan.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="submit" value="Proceed to Payment" class="btn btn-primary" /></td>
+                        </form>
+                        </tr>
+            </tfoot>
+        </table>
+        <!-- Blinking warning message -->
+        <p id="priceMessage" class="text-center blinking">Please click on any package to see the price breakup.</p>
+    </section>
+    <!-- End -->
+</main>
+<!-- End -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".select-validity").on('click', function () {
+            // Hide the blinking message
+            $("#priceMessage").hide(); // This line hides the blinking message
+
+            // Convert data-planprice and data-discount to integers
+            var _planPrice = Math.round(parseInt($(this).attr('data-planprice'))); // Ensure integer
+            var _planDisc = Math.round(parseInt($(this).attr('data-discount')));   // Ensure integer
+            var _planValid = Math.round(parseInt($(this).val()));                  // Ensure integer
+
+            // Calculate the total price as an integer
+            var _totalPrice = _planPrice * _planValid;
+            var _discountedPrice = _totalPrice;
+
+            // Always show the original price
+            $(".originalPrice").text(_totalPrice);
+
+            // If there's a discount, apply it and show the discounted price
+            if (_planDisc > 0) {
+                var _discountAmount = Math.round((_totalPrice * _planDisc) / 100); // Calculate discount and round
+                _discountedPrice = _totalPrice - _discountAmount;
+
+                // Show the "After Discount" row
+                $(".discountedPrice").text(_discountedPrice);
+                $(".discount-row").show();
+            } else {
+                // No discount (for the 1-month plan), hide the discount row
+                $(".discount-row").hide();
+            }
+
+            // Show the payment info section
+            $(".payment-info").show();
+        });
+    });
+</script>
+
+{% endblock content %}
