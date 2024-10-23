@@ -107,29 +107,26 @@ class PlanDiscount(models.Model):
         return self.total_months
     
     
+# Subscriber
 class Subscriber(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    mobile = models.IntegerField()
-    address = models.TextField(max_length=150)
-    img = models.ImageField(upload_to="subs/")
+	user=models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+	mobile=models.CharField(max_length=20, null=True, blank=True)
+	address=models.TextField(null=True, blank=True)
+	img=models.ImageField(upload_to="subs/",null=True)
 
-    def __str__(self):
-        return self.user
-    
-    def image_tag(self):
-        if self.img:
-            return mark_safe('<img src="%s" style="width:80px;" />' % (self.img.url))
-        else:
-            return 'No Image'
+	def __str__(self):
+		return str(self.user)
 
+	def image_tag(self):
+		if self.img:
+			return mark_safe('<img src="%s" width="80" />' % (self.img.url))
+		else:
+			return 'no-image'
 
-@receiver(post_save, sender=User)
-def create_subscriber(sender, instance, created, **kwargs):
-    if created:
-        subs= Subscriber.objects.create(user=instance)
-        print(subs)
-        
-
+@receiver(post_save,sender=User)
+def create_subscriber(sender,instance,created,**kwrags):
+	if created:
+		Subscriber.objects.create(user=instance)
 
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

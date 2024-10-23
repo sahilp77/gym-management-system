@@ -64,21 +64,16 @@ from django.shortcuts import render, redirect
 from . import forms
 from .models import Subscriber
 
+# SignUp
 def signup(request):
-    msg = None
-    if request.method == 'POST':
-        form = forms.SignUp(request.POST)
-        if form.is_valid():
-            user = form.save()  # Save the user
-            # Automatically create a Subscriber for the new user
-            Subscriber.objects.create(user=user)
-            msg = 'Registration successful! You are now a subscriber.'
-            return redirect('home')  # Redirect to home after signup
-    else:
-        form = forms.SignUp()
-
-    context = {"form": form, "msg": msg}
-    return render(request, 'registration/signup.html', context)
+	msg=None
+	if request.method=='POST':
+		form=forms.SignUp(request.POST)
+		if form.is_valid():
+			form.save()
+			msg='Thank you for register.'
+	form=forms.SignUp
+	return render(request, 'registration/signup.html',{'form':form,'msg':msg})
 
 def checkout(request,plan_id):
     planDetails = models.Pricing.objects.get(pk = plan_id)
