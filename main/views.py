@@ -6,6 +6,9 @@ from . import forms
 from django.contrib.auth import logout
 import stripe
 from django.core.mail import EmailMessage
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 
 # home page
 
@@ -125,3 +128,53 @@ def success(request):
 
 def cancel(request):
     return render(request, 'cancel.html')
+
+def user_dashboard(request):
+    return render(request, 'user/dashboard.html')
+
+def update_profile(request):
+    msg = None
+    if request.method == 'POST':
+        form = forms.ProfileForm(request.POST, instance = request.user)
+        if form.is_valid():
+            form.save()
+            msg = "Profile has been updated!"
+    form = forms.ProfileForm(instance = request.user)
+    context = {'form': form, 'msg' : msg}
+    return render(request, 'user/update-profile.html', context)
+
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Prevent logout after password change
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    
+    return render(request, 'registration/new_password_form.html', {'form': form})
+
+
+def trainerlogin(request):
+    msg = ' '
+    if request.method == 'POST':
+        username = request.POST['username']
+        pwd = request.POST['pwd']
+        trainer = models.Trainer.objects.filter(username=username, pwd=pwd).count()
+        if trainer > 0:
+            request.session['trainerlogin'] = True
+            return redirect('trainer_dashboard/')
+        else:
+            msg = "Invalid!"
+    form = forms.TrainerLoginForm()
+    context = {"form" : form , 'msg' : msg}
+    return render(request, 'trainer/trainerlogin.html', context)
+
+def trainerlogout(request):
+    del request.session['trainerlogin']
+    return redirect('trainerlogin/')

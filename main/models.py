@@ -103,8 +103,8 @@ class PlanDiscount(models.Model):
     total_months = models.IntegerField()
     total_discount = models.IntegerField()
     
-    def __str__(self):
-        return self.total_months
+    def __int__(self):
+        return str(self.total_months)
     
     
 # Subscriber
@@ -132,3 +132,20 @@ class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     plan = models.ForeignKey(Pricing, on_delete=models.CASCADE, null=True)
     price = models.IntegerField()
+
+
+class Trainer(models.Model):
+    full_name = models.CharField(max_length=100)
+    username = models.CharField(max_length=100, null=True)
+    pwd = models.CharField(max_length=50, null=True)
+    mobile = models.IntegerField()
+    address = models.TextField()
+    is_active = models.BooleanField(default=False)
+    detail = models.TextField()
+    img = models.ImageField(upload_to='trainers/')
+    
+    def __str__(self):
+        return self.full_name
+    
+    def image_tag(self):
+        return mark_safe('<img src="%s" width="100 />' % self.img.url)

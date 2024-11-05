@@ -20,6 +20,15 @@ urlpatterns = [
     path('checkout_session/<str:plan_id>',views.checkout_session, name='checkout_session'),
     path('success/',views.success, name='success'),
     path('cancel/',views.cancel, name='cancel'),
+    path('user-dashboard/',views.user_dashboard, name='user_dashboard'),
+    path('update-profile/',views.update_profile, name='update_profile'),
+    path('change-password/', views.change_password, name='new_password'),
+    path('trainerlogin/', views.trainerlogin, name='trainerlogin'),
+    path('trainerlogout/', views.trainerlogout, name='trainerlogout'),
+    
+    
+
+
 
 
 
